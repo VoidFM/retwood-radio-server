@@ -19,12 +19,17 @@ async function catalogFor(env,server){return {server:{id:'metro',name:server.nam
 async function passwordHash(password,salt){const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:bytesOf(salt),iterations:100000,hash:'SHA-256'},key,256);return base64(new Uint8Array(bits))}
 async function setPassword(password){if(typeof password!=='string'||password.length<10||password.length>128)fail('Use a server password between 10 and 128 characters');const salt=base64(crypto.getRandomValues(new Uint8Array(16)));return {salt,hash:await passwordHash(password,salt)}}
 async function signedToken(env,prefix){return prefix+'.'+await signature(env,prefix)}
-async function authorized(request,env,server='metro'){
+async function authorized(request,env,server='metro',{listen=false}={}){
  if(!env.STATION_KEY)fail('Station access is not configured',503);
  const token=request.headers.get('authorization')?.replace(/^Bearer /,'')||'';
  if(secureEqual(token,env.STATION_KEY))return {role:'station',actor:'host'};
  const p=token.split('.'),expires=Number(p[1]);
  if(expires>Date.now()&&expires<Date.now()+90000000&&p.at(-1)===await signature(env,p.slice(0,-1).join('.'))){
+  if(p[0]==='listener'&&p.length===6&&p[2]===server){
+   const network=await serverInfo(env,server);if(Number(p[3])!==network.password_version)fail('Server password changed. Please sign in again.',401);
+   if(!listen)fail('Scanner access is receive-only',403);
+   return {role:'listener',actor:'listener:'+p[4]};
+  }
   if(p[0]==='operator'&&((p.length===5&&p[2]===server)||(p.length===4&&server==='metro')))return {role:'operator',actor:'operator:'+p.at(-2)};
   if(p[0]==='radio'&&p.length===7&&p[2]===server){
    const network=await serverInfo(env,server);if(Number(p[3])!==network.password_version)fail('Server password changed. Please sign in again.',401);
@@ -37,10 +42,14 @@ async function authorized(request,env,server='metro'){
 async function ownsTransmission(request,env,server,tx){const auth=await authorized(request,env,server);if(!tx||tx.server_id!==server)fail('Transmission not found',404);if(!['station'].includes(auth.role)&&tx.owner&&tx.owner!==auth.actor)fail('This transmission belongs to another station',403);return auth}
 async function serverRoutes(request,env,url,now){
  const path=url.pathname;
- if(path==='/api/radio/login'&&request.method==='POST'){
+ if(['/api/radio/login','/api/scanner/login'].includes(path)&&request.method==='POST'){
   const id=slugOf(url.searchParams.get('server')),server=await serverInfo(env,id),b=await body(request);await rateLimit(request,env,'login:'+id,20);
   if(!server.password_hash)fail('The host must set this server’s password before radios can join.',503);
   if(typeof b.password!=='string'||b.password.length>128||!secureEqual(await passwordHash(b.password,server.password_salt),server.password_hash))fail('Server address or password is incorrect',401);
+  if(path==='/api/scanner/login'){
+   const prefix='listener.'+(now+86400000)+'.'+id+'.'+server.password_version+'.'+crypto.randomUUID();
+   return json({token:await signedToken(env,prefix),...await catalogFor(env,server)});
+  }
   const callsign=String(b.callsign||'').trim();if(!/^[A-Za-z0-9][A-Za-z0-9 ._/-]{0,23}$/.test(callsign))fail('Enter a callsign using 1–24 letters, numbers, spaces or . _ / -');
   const station=clean(b.station);if(!/^[a-f0-9-]{36}$/.test(station))fail('Invalid radio ID');
   const identity=base64(new TextEncoder().encode(JSON.stringify({station,callsign}))),prefix='radio.'+(now+86400000)+'.'+id+'.'+server.password_version+'.'+identity+'.'+crypto.randomUUID();
@@ -73,9 +82,9 @@ async function handle(request,env,ctx){
  if(env.SERVER_CONFIG?.scannerEnabled===false){
   const read=request.method==='GET'&&['/api/radio/me','/api/catalog','/api/status','/api/feed'].includes(path);
   const write=request.method==='POST'&&(['/api/station','/api/tx'].includes(path)||/^\/api\/tx\/[a-f0-9-]{36}\/(packets|end|cancel)$/.test(path));
-  const login=path==='/api/radio/login'&&request.method==='POST';
+  const login=['/api/radio/login','/api/scanner/login'].includes(path)&&request.method==='POST';
   if(!read&&!write&&!login)fail('Not found',404);
-  if(!login){const auth=await authorized(request,env,slugOf(url.searchParams.get('server')));if(!['radio','station'].includes(auth.role))fail('Radio login required',403)}
+  if(!login){const auth=await authorized(request,env,slugOf(url.searchParams.get('server')),{listen:read});if(!['radio','station','listener'].includes(auth.role))fail('Radio login required',403)}
  }
  if(path==='/'&&request.method==='GET')return new Response(env.SCANNER_HTML,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-cache','content-security-policy':"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src 'self' blob:; connect-src 'self'; img-src 'self' data:; frame-ancestors 'self' https://chatgpt.com"}});
  if(path==='/favicon.svg')return new Response('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#101c25"/><path d="M18 48V25h28v23M23 25V10m5 25h12m-12 6h12" fill="none" stroke="#e9b45e" stroke-width="5"/></svg>',{headers:{'content-type':'image/svg+xml'}});

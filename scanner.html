@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https: http:"><title>Retwood Live Scanner</title><style>
+:root{color-scheme:dark;font:14px system-ui,-apple-system,'Segoe UI',sans-serif;color:#e6eadf;background:#181c18}*{box-sizing:border-box}body{max-width:850px;margin:36px auto;padding:0 20px}header{display:flex;gap:12px;align-items:center;padding-bottom:22px;border-bottom:1px solid #3b4337;margin-bottom:24px}header svg{width:40px;height:40px;border-radius:8px;background:#2c3926;padding:7px;fill:#c2e77a}h1{font-size:21px;letter-spacing:.2px;margin:0 0 3px}header p{font-size:12px;color:#adb7a4;margin:0}label{display:block;font-size:12px;color:#bdc6b3;margin-bottom:7px}input,select,button{font:inherit;color:inherit;border-radius:4px;border:1px solid #59624e;padding:10px 12px;background:#22271f}input,select{width:100%}input{user-select:text}input:focus,select:focus,button:focus-visible{outline:2px solid #b8d778;outline-offset:2px}button{cursor:pointer}button:disabled{opacity:.6;cursor:wait}.primary{background:#badb75;color:#182011;border-color:#badb75;font-weight:600}.row{display:flex;gap:10px;align-items:center}.field{margin:0 0 19px}.box{border:1px solid #414b39;border-radius:5px;background:#1e231c;padding:22px}.login{max-width:480px}h2{font-size:16px;margin:0 0 19px}.muted,.note{color:#abb5a1;font-size:12px;line-height:1.6}.note{margin:22px 0}.error{color:#f3b4a7!important}.hidden,[hidden]{display:none!important}#loginError{margin:14px 0 0;line-height:1.5;color:#bbcba9;font-size:13px}#loginError:empty{display:none}.connection{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:23px}#host{font-size:12px;color:#aab49f;overflow-wrap:anywhere;margin-top:5px}#disconnect{font-size:12px;padding:7px 10px}#connectionStatus{font-size:12px;color:#bfcdac;margin-top:12px;min-height:18px}.controls{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end}#toggleAudio{min-width:118px}.volume{display:flex;align-items:center;gap:12px;margin-top:20px}.volume label{margin:0;white-space:nowrap}.volume input{padding:0;border:0;max-width:240px;accent-color:#badb75}.volume output{font-size:12px;color:#b1bca6}.receiver{margin-top:24px}#state{font-size:24px;font-weight:600;color:#dce8ce;margin-bottom:8px}#state.live{color:#c1e58a}#state.quiet{color:#e6c783}#caller{min-height:24px;font-size:16px}#channelName{font-size:12px;color:#acb89f;min-height:20px;margin-top:5px}meter{width:100%;height:22px;margin-top:18px;accent-color:#badb75}.stats{display:flex;gap:22px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:#b8c3ad}.calls{margin-top:25px}.calls h2{font-size:13px;color:#bdc8b1;margin-bottom:10px}#history{padding:0;margin:0;list-style:none}#history li{border-top:1px solid #394331;padding:10px 0;display:flex;gap:14px;font-size:12px;align-items:baseline}#history time{color:#a3b094;min-width:75px;font-variant-numeric:tabular-nums}#history span{flex:1;overflow-wrap:anywhere}#history small{color:#aab69b;font-size:10px}#history .empty{color:#a3ae98}footer{font-size:11px;color:#94a187;padding:20px 0 5px;line-height:1.6}@media(max-width:500px){body{margin:20px auto;padding:0 14px}.box{padding:17px}.controls{grid-template-columns:1fr}#toggleAudio{justify-self:start}.connection{align-items:flex-start}#state{font-size:21px}}
+</style></head><body>
+<header><svg viewBox="0 0 96 96" aria-hidden="true"><path fill-rule="evenodd" d="M20 16h32c16 0 26 8 26 22 0 10-5 18-14 21l18 23H61L41 57h-4v25H20V16zm17 15v12h14c6 0 10-2 10-6s-4-6-10-6H37z"/></svg><div><h1>Retwood Live Scanner</h1><p>Server audio monitor</p></div></header>
+<form id="login" class="box login"><h2>Connect to your server</h2><div class="field"><label for="server">Server address</label><input id="server" type="url" required autocomplete="url" spellcheck="false" value="https://retwood-radio.onrender.com"></div><div class="field"><label for="password">Server password</label><input id="password" type="password" required minlength="10" maxlength="128" autocomplete="current-password"></div><button id="connect" class="primary" type="submit">Connect &amp; listen</button><p id="loginError" role="status" aria-live="polite"></p></form>
+<main id="monitor" hidden><div class="connection"><div><strong id="serverName">Server</strong><div id="host"></div></div><button id="disconnect" type="button">Disconnect</button></div><div class="box"><div class="controls"><div><label for="channel">Channel</label><select id="channel"><option value="auto">Auto — follow active channels</option></select></div><button id="toggleAudio" type="button">Pause audio</button></div><div class="volume"><label for="volume">Volume</label><input id="volume" type="range" min="0" max="100" value="75"><output id="volumeValue" for="volume">75%</output></div><div class="receiver"><div id="state" role="status" aria-live="polite">Listening</div><div id="caller">Waiting for a transmission</div><div id="channelName">Auto — all channels</div><meter id="level" min="0" max="1" value="0" aria-label="Received microphone audio level"></meter><div class="stats"><span id="db">— dBFS</span><span id="packets">0 audio packets</span><span id="lastHeard">Nothing received yet</span></div></div><div id="connectionStatus" role="status"></div></div><section class="calls"><h2>Recent calls</h2><ol id="history"><li class="empty">No calls yet</li></ol></section><p class="note">Hold PTT on the radio and speak. “Audio received” confirms non-silent audio arrived from the server. “Mic is quiet” means audio packets arrived but their samples were near silence. Use headphones to keep this playback out of your radio microphone.</p></main>
+<footer>This page only receives server audio. It never opens your microphone. The password and listening session stay in memory until you disconnect or close the page.</footer>
+<!-- P25-styled listener cues derived from public-domain recordings by W2SJW contributors Tobias and Reed: https://w2sjw.com/radio_sounds.html ; Moto_Tri_TPT.mp3 and MDC-1200_DOS.mp3. Rendered through the IMBE codec; these are custom listening effects, not P25-standard signaling. -->
+<script>
+// Generated by scripts/generate-scanner-ptt.py; provenance in SOURCES.md.
+globalThis.SCANNER_PTT_PCM = Object.freeze({"key":"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","release":"AAAAAAAAAQD+/wAAAgAAAAIAAAABAP///P8EAP7/AgAHAPn/+//+/wIAAwD9/wMA/f8AAAMA9v8DACkAMwDA/2T/7f8qABX/vP7IAKUC/AGt/8z+3f/3/5D9L/wnAIgEsANzAI0AOwIsAEv8B/uY/YgALACcAOEFFQlnA1r65fh7/j8DXANdAHr+Pfwo+W/5kv/gBlAHqQL1/7T9+PtC/YP/xQMTBfEABP5YAu4IuwUm/bz5bfru+kD7Gfzk/tUCkwOBARkCtgc1CCn+vvYm+Mb9MwOYAun/6QAvAlj/jPqz/HEDUwEL+bT2Dv3+BvwKJQffAMv/ZwSKBZoB4vtt9535+/4E/+b/rQRpBVD/E/z8AeADof5E+WD59/8DAhT8xvo/AykJ3ANj+/X8xwRcBjj+2/fi/EAB8vpa9kQAugubCpQAoPqx/QoAJ/rU8yr8ywmrCkoC9v89BP4BHfoo9tb5PAAJAVIAaAeXDv8I9PqK9VD8/QO7BSYCPv8v/cr50/jD/aEFKAg7BNMA7P5E/dH91P5bAYEDpAFC/1QBkQaPBdn9Qfmw++z/QgCL/ZL9tAE8A+T/IP6AAVcDV//r/RkCeQMp/3z7kv2aAaMCmgHx/5f+wP7G/wUAPP/w/nAAlgLDAu//rvyL/Gf/XQO+BdwC9/oQ9tL7QwYYCf8CbPzJ+kT9TQCKAWwCPQO7ATn9/Plo/DgCCQX9Aan9uv3aAUYEdQHt/BT8DP96AJD/HgGMBJEDXP34+YL9TwH+ACYAIQEAAtYBQQGI/uT7vv2uAIMB3wI1BOkANfvl+jL/qwCG/5EBBgXeA4v+ofvM/YQAJQHFAYECuv9Y+1z9DgSbA737LfrrAXQGigGh+9v83AJ6BM/9K/nB/7gHIQP++LP5AgOdBowC4f/y/079Dfok/XAEYAW8/mP7LQCwBFEC+f0L/8ABvf/Y/FX+aQKiBBYCvPwD+TX7bQLrB1UIoQH0+FP1pvnNA5wKTAmL/271Q/X8/2AMOQ2iAqT2F/GQ94cFmBASDsv+NvDS7Uv5Ygm1E3cNhvu+7K7s5/3hEBEWkQlW9CHrdvL1Aq8T5xGNAW3vcust+6kN1RPVB0D1nOs08qkD0RPRFBQFtfBh6DH1UwoHGMQRPP016w7oGfr9EFIZNAxV9GfmA+3VAyoYARZoApvv4uns9wgKvxQfDq/4yOwB8CkBEhJoEmcF9PLQ6rP2aQptF88Pe/ok7Hjq3/koDkAWNQtU9kzq8e3YAEATXRd9CLfwwufN8w0JRRWoERQAxeyK6fn4/A6WFkIJYvW97LT0IgVfEkUR5v/87SPsVPoTDAwWAQ6D+EjqP+zQ/tsTFBlGCRPyq+dF8Q4HLhdYFNT/hey56YL5lQyVE0EKRvkx72XzOgFHDNoMKAI396X0VvuTBU0LCQee/d/2BveD/7kHDwmAAmL6kffv+p4BIwZmBdcANPzq+tf9GwIJBH8Cif+z/VL+9v+yAHIA7/8DAB8ADgAAAOT/6/8HABgAHAAHAPb/5P/2/woABwAHAP3/+f/v//b/CgAKABUAAwDv/+T/9v8HAAAAGAAHAP3/AADv/wAABwARAA0A5P/l/wIAHAAcAAIA8P/x/wIADwAEAP3//P/9/wIAAQABAAQAAQD///7///8AAA=="});
+
+'use strict';
+// One receive opening and closing per transmission, independent of packet size.
+// All sources share the listener's volume control. No microphone is opened here.
+globalThis.ScannerAudio = class ScannerAudio {
+  constructor(context, output, {sources = new Set(), latency = .3, maxAhead = 5} = {}) {
+    this.context = context;
+    this.output = output;
+    this.sources = sources;
+    this.latency = latency;
+    this.maxAhead = maxAhead;
+    this.nextTime = 0;
+    this.calls = new Map();
+    this.current = null;
+    this.cues = Object.fromEntries(Object.entries(globalThis.SCANNER_PTT_PCM).map(([key, pcm]) => [key, this.decode(pcm)]));
+  }
+
+  decode(pcm) {
+    const raw = atob(pcm), buffer = this.context.createBuffer(1, raw.length / 2, 8000);
+    const samples = buffer.getChannelData(0);
+    for (let i = 0; i < samples.length; i++) {
+      let value = raw.charCodeAt(i * 2) | (raw.charCodeAt(i * 2 + 1) << 8);
+      if (value > 32767) value -= 65536;
+      samples[i] = value / 32768;
+    }
+    return buffer;
+  }
+
+  schedule(buffer, at, call, type) {
+    const source = this.context.createBufferSource();
+    source.buffer = buffer;
+    source.connect(this.output);
+    this.sources.add(source);
+    call.sources.add(source);
+    source.onended = () => {this.sources.delete(source); call.sources.delete(source); source.disconnect()};
+    source.start(at);
+    return source;
+  }
+
+  packet(packet, buffer = this.decode(packet.pcm)) {
+    let call = this.calls.get(packet.tx);
+    if (call && (packet.seq <= call.seq || call.closed)) return;
+    const now = this.context.currentTime;
+    if (this.nextTime > now + this.maxAhead) this.stop();
+    if (!call || !this.calls.has(packet.tx)) {
+      if (this.current && !this.current.closed) this.close(this.current);
+      this.nextTime = Math.max(this.nextTime, now + this.latency);
+      call = {id: packet.tx, seq: -1, end: this.nextTime, closed: false, sources: new Set()};
+      this.calls.set(packet.tx, call);
+      this.current = call;
+      this.schedule(this.cues.key, this.nextTime, call, 'key');
+      this.nextTime += this.cues.key.duration + .015;
+      // Completed IDs prevent duplicate polls from replaying opening cues.
+      if (this.calls.size > 128) for (const [id, old] of this.calls) {
+        if (old.closed && !old.sources.size) {this.calls.delete(id); break}
+      }
+    }
+    this.nextTime = Math.max(this.nextTime, now + .02);
+    this.schedule(buffer, this.nextTime, call, 'voice');
+    this.nextTime += buffer.duration;
+    call.end = this.nextTime;
+    call.seq = packet.seq;
+  }
+
+  close(call) {
+    if (call.closed) return;
+    call.closed = true;
+    const at = Math.max(call.end, this.context.currentTime + .01);
+    this.schedule(this.cues.release, at, call, 'release');
+    call.end = at + this.cues.release.duration;
+    this.nextTime = Math.max(this.nextTime, call.end + .025);
+  }
+
+  sync(history) {
+    for (const row of history) {
+      const call = this.calls.get(row.id);
+      if (!call) continue;
+      if (row.canceled) {
+        for (const source of call.sources) {try {source.stop()} catch {}}
+        call.closed = true;
+        call.end = this.context.currentTime;
+        if (this.current === call) this.nextTime = 0;
+      } else if (row.endedAt !== null && call.seq >= row.lastSeq) this.close(call);
+    }
+  }
+
+  get busy() {
+    return this.nextTime > this.context.currentTime || [...this.calls.values()].some(call => !call.closed);
+  }
+
+  stop() {
+    for (const source of this.sources) {try {source.stop()} catch {}}
+    this.sources.clear();
+    this.calls.clear();
+    this.current = null;
+    this.nextTime = 0;
+  }
+};
+
+'use strict';
+const $=id=>document.getElementById(id);
+let base='',token='',catalog=null,connected=false,audible=true,context,gain,player,channelId=null,cursor,generation=0,feedGeneration=0,feedAbort,activeChannels=[],calls=[],recentCalls=new Map(),packetCount=0,lastPacket=0,lastAudible=0,lastRms=0,lastDb=-100,lastLabel='',pendingCaller='',controllers=new Set();
+const hosted=['http:','https:'].includes(location.protocol);
+$('server').value=hosted?location.origin:'https://retwood-radio.onrender.com';
+function serverAddress(value){const url=new URL(value.includes('://')?value:'https://'+value);if(url.username||url.password||url.pathname!=='/'||url.search||url.hash||!(url.protocol==='https:'||(url.protocol==='http:'&&['localhost','127.0.0.1','[::1]'].includes(url.hostname))))throw Error('Enter an HTTPS server address, without a path.');return url.origin}
+async function api(path,{body,signal,timeout=10000}={}){
+ const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),timeout);controllers.add(abort);
+ const cancel=()=>abort.abort();signal?.addEventListener('abort',cancel,{once:true});if(signal?.aborted)abort.abort();
+ try{const response=await fetch(base+path,{method:body?'POST':'GET',mode:'cors',credentials:'omit',cache:'no-store',headers:{...(token?{authorization:'Bearer '+token}:{}),...(body?{'content-type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,signal:abort.signal});let data;try{data=await response.json()}catch{throw Error('The server did not return radio data. It may still be starting.')}
+ if(!response.ok){const error=Error(response.status===404?'This server needs the scanner update before it can accept browser listeners.':data.error||'Server returned '+response.status);error.status=response.status;throw error}return data;
+ }finally{clearTimeout(timer);controllers.delete(abort);signal?.removeEventListener('abort',cancel)}
+}
+async function audio(){if(!context){context=new AudioContext();gain=context.createGain();gain.gain.value=Number($('volume').value)/100;gain.connect(context.destination);player=new ScannerAudio(context,gain,{latency:.35,maxAhead:4})}await context.resume();if(context.state!=='running')throw Error('Click Connect again to enable browser audio.')}
+function stopAudio(){player?.stop()}
+function renderHistory(){const list=$('history');list.replaceChildren();for(const call of [...recentCalls.values()].sort((a,b)=>b.startedAt-a.startedAt).slice(0,10)){const row=document.createElement('li'),time=document.createElement('time'),name=document.createElement('span'),state=document.createElement('small');time.dateTime=new Date(call.startedAt).toISOString();time.textContent=new Date(call.startedAt).toLocaleTimeString();name.textContent=call.label;state.textContent=call.active&&activeChannels.includes(call.channel)?'TRANSMITTING':call.canceled?'STOPPED':call.title?.startsWith('Emergency')?'EMERGENCY':'COMPLETE';row.append(time,name,state);list.append(row)}if(!recentCalls.size){const row=document.createElement('li');row.className='empty';row.textContent='No calls yet';list.append(row)}}
+function renderChannels(){const value=$('channel').value||'auto';$('channel').replaceChildren(new Option('Auto — follow active channels','auto'));const groups=new Map();for(const item of catalog.channels){let group=groups.get(item.zone);if(!group){group=document.createElement('optgroup');group.label=item.zone;groups.set(item.zone,group);$('channel').append(group)}group.append(new Option(String(item.number).padStart(2,'0')+' · '+item.name,String(item.id)))}$('channel').value=value}
+function selectChannel(id){if(channelId===id)return;channelId=id;cursor=undefined;feedGeneration++;feedAbort?.abort();stopAudio();calls=[];lastPacket=0;lastAudible=0;lastLabel='';pendingCaller='';renderHistory();$('channelName').textContent=id===null?'Auto — waiting for an active channel':catalog.channels[id].zone+' / '+catalog.channels[id].name;if(id!==null)void pollFeed(generation,feedGeneration)}
+function receive(packet,serverTime){if(serverTime-packet.at>3000)return;const buffer=player.decode(packet.pcm),samples=buffer.getChannelData(0);let square=0;for(const value of samples)square+=value*value;lastRms=Math.sqrt(square/Math.max(1,samples.length));lastDb=Math.max(-100,20*Math.log10(Math.max(.00001,lastRms)));lastPacket=performance.now();if(lastRms>.001)lastAudible=lastPacket;lastLabel=packet.label;packetCount++;$('packets').textContent=packetCount+' audio packet'+(packetCount===1?'':'s');$('lastHeard').textContent='Last heard '+new Date().toLocaleTimeString();if(audible)player.packet(packet,buffer)}
+function sessionFailure(error){if(error.status===401){disconnect('Session expired. Enter the server password to reconnect.');return true}return false}
+async function pollFeed(connection,feed){if(!connected||connection!==generation||feed!==feedGeneration||channelId===null)return;feedAbort=new AbortController();let delay=300;try{const data=await api('/api/feed?channel='+channelId+(cursor===undefined?'&catchup=1200':'&after='+cursor),{signal:feedAbort.signal});if(connection!==generation||feed!==feedGeneration)return;cursor=data.cursor;calls=data.history;for(const call of calls)recentCalls.set(call.id,call);if(recentCalls.size>50){const ordered=[...recentCalls.values()].sort((a,b)=>b.startedAt-a.startedAt);recentCalls=new Map(ordered.slice(0,50).map(call=>[call.id,call]))}pendingCaller=calls.find(t=>t.active&&!t.canceled)?.label||'';for(const packet of data.packets)if(!calls.some(call=>call.id===packet.tx&&call.canceled))receive(packet,data.serverTime);if(audible)player.sync(calls);renderHistory()}catch(error){if(connection!==generation||feed!==feedGeneration)return;if(error.name!=='AbortError'){if(sessionFailure(error))return;$('connectionStatus').textContent='Reconnecting: '+error.message;$('connectionStatus').className='error';delay=1500}}if(connection===generation&&feed===feedGeneration&&connected)setTimeout(()=>pollFeed(connection,feed),delay)}
+async function pollStatus(connection){if(!connected||connection!==generation)return;let delay=700;try{const [status,nextCatalog]=await Promise.all([api('/api/status'),api('/api/catalog')]);if(connection!==generation)return;const changed=JSON.stringify(nextCatalog.channels)!==JSON.stringify(catalog.channels);catalog=nextCatalog;activeChannels=status.activeChannels||[];if(changed){renderChannels();if(channelId!==null)$('channelName').textContent=catalog.channels[channelId].zone+' / '+catalog.channels[channelId].name}$('serverName').textContent=catalog.server.name;$('connectionStatus').textContent='Connected · '+status.radios.length+' radio'+(status.radios.length===1?'':'s')+' online';$('connectionStatus').className='';if($('channel').value==='auto'){if(!activeChannels.includes(channelId)&&!player.busy)selectChannel(activeChannels[0]??null)}else selectChannel(Number($('channel').value));
+ }catch(error){if(connection!==generation)return;if(sessionFailure(error))return;$('connectionStatus').textContent='Reconnecting: '+(error.name==='AbortError'?'Server request timed out.':error.message);$('connectionStatus').className='error';delay=2000}if(connection===generation&&connected)setTimeout(()=>pollStatus(connection),delay)}
+function disconnect(message=''){connected=false;token='';generation++;feedGeneration++;for(const controller of controllers)controller.abort();controllers.clear();feedAbort?.abort();stopAudio();channelId=null;cursor=undefined;calls=[];lastPacket=0;lastAudible=0;pendingCaller='';$('monitor').hidden=true;$('login').hidden=false;$('connect').disabled=false;$('connect').textContent='Connect & listen';$('loginError').textContent=message;$('password').value='';$('password').focus()}
+$('login').onsubmit=async event=>{event.preventDefault();$('connect').disabled=true;$('connect').textContent='Connecting…';$('loginError').textContent='';$('loginError').className='';const connection=++generation,waking=setTimeout(()=>{if(connection===generation)$('loginError').textContent='Starting the hosted server. This may take about a minute.'},8000);try{base=serverAddress($('server').value.trim());await audio();const login=await api('/api/scanner/login',{body:{password:$('password').value},timeout:90000});if(connection!==generation)return;token=login.token;catalog=login;connected=true;audible=true;recentCalls.clear();renderHistory();packetCount=0;$('packets').textContent='0 audio packets';$('password').value='';$('host').textContent=base;$('serverName').textContent=login.server.name;$('login').hidden=true;$('monitor').hidden=false;$('toggleAudio').textContent='Pause audio';renderChannels();void pollStatus(connection)}catch(error){if(connection!==generation)return;token='';$('loginError').textContent=error.name==='AbortError'?'The server took too long to respond. Try connecting again.':error.message;$('loginError').className='error';$('connect').disabled=false;$('connect').textContent='Connect & listen'}finally{clearTimeout(waking)}};
+$('disconnect').onclick=()=>disconnect();$('channel').onchange=()=>selectChannel($('channel').value==='auto'?(activeChannels[0]??null):Number($('channel').value));
+$('toggleAudio').onclick=async()=>{try{await audio();audible=!audible;stopAudio();$('toggleAudio').textContent=audible?'Pause audio':'Play audio'}catch(error){$('connectionStatus').textContent=error.message}};
+$('volume').oninput=()=>{$('volumeValue').value=$('volume').value+'%';if(gain)gain.gain.setTargetAtTime(Number($('volume').value)/100,context.currentTime,.02)};
+setInterval(()=>{if(!connected)return;const now=performance.now(),fresh=lastPacket>0&&now-lastPacket<1000,voice=fresh&&lastAudible>0&&now-lastAudible<800;$('state').textContent=!audible?'Audio paused':fresh?(voice?'Audio received':'Transmission received — mic is quiet'):pendingCaller?'Transmitting — waiting for audio':'Listening';$('state').className=fresh?(voice?'live':'quiet'):'';$('caller').textContent=fresh?lastLabel:pendingCaller||'Waiting for a transmission';$('level').value=fresh?Math.min(1,lastRms*5):0;$('db').textContent=fresh?lastDb.toFixed(1)+' dBFS':'— dBFS'},100);
+window.addEventListener('pagehide',()=>{for(const controller of controllers)controller.abort();stopAudio();token=''});
+
+</script></body></html>

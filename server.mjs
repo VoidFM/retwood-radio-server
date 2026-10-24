@@ -42,12 +42,20 @@ export function start({file=configFile,port,host,quiet=false}={}){
  const pending=new Set();const context={waitUntil(p){pending.add(p);p.catch(e=>console.error('Background task:',e.message)).finally(()=>pending.delete(p))}};
  const listener=async(req,res)=>{
   let pathname;try{pathname=new URL(req.url,'http://radio.local').pathname}catch{res.writeHead(400);res.end();return}const ip=clientAddress(req,config.trustProxy);
-  const ticket=protection.enter(ip,pathname==='/api/radio/login');
+  // CORS also covers throttled requests from a downloaded scanner page.
+  const listenerApi=['/api/scanner/login','/api/catalog','/api/status','/api/feed'].includes(pathname);
+  if(listenerApi){res.setHeader('access-control-allow-origin','*');res.setHeader('access-control-allow-methods','GET, POST, OPTIONS');res.setHeader('access-control-allow-headers','authorization, content-type');res.setHeader('access-control-max-age','600')}
+  const ticket=protection.enter(ip,req.method==='POST'&&['/api/radio/login','/api/scanner/login'].includes(pathname));
   if(!ticket.release){res.writeHead(429,{'content-type':'application/json','cache-control':'no-store','retry-after':String(ticket.retryAfter),'connection':'close'});res.end('{"error":"Too many requests. Please wait and try again."}');req.resume();return}
   res.once('close',ticket.release);res.once('finish',ticket.release);
   req.setTimeout(10000,()=>req.destroy());
   try{
    refresh();
+   // Standalone HTML listeners use explicit bearer grants, never cookies.
+   if(listenerApi&&req.method==='OPTIONS'){res.writeHead(204);res.end();return}
+   if(['/scanner','/scanner.html'].includes(pathname)&&req.method==='GET'){
+    res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer','content-security-policy':"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https: http:; frame-ancestors 'self'"});res.end(fs.readFileSync(path.join(root,'scanner.html'),'utf8'));return;
+   }
    if(config.scannerEnabled&&(pathname==='/audio-test'||pathname==='/audio-test.html')&&req.method==='GET'){
     res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','content-security-policy':"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'"});res.end(fs.readFileSync(path.join(root,'public/audio-test.html'),'utf8'));return;
    }
