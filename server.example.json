@@ -1,0 +1,10 @@
+{
+  "name": "Metro Fire",
+  "host": "0.0.0.0",
+  "port": 8080,
+  "channelsFile": "channels.json",
+  "dataDirectory": ".data",
+  "dispatchCallsign": "Dispatch",
+  "password": "CHANGE_ME_NOW",
+  "scannerEnabled": false
+}

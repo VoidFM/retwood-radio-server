@@ -1,0 +1,21 @@
+# Upload the contents of this folder to a Git repository, then create a Render Blueprint.
+# This intentionally requests the Free plan. No disk or paid database is provisioned.
+services:
+  - type: web
+    name: retwood-radio
+    runtime: node
+    plan: free
+    buildCommand: node --check managed.mjs
+    startCommand: node --experimental-sqlite managed.mjs
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: RADIO_NAME
+        sync: false
+      - key: RADIO_PASSWORD
+        sync: false
+      - key: RADIO_SIGNING_SECRET
+        generateValue: true
+      - key: RADIO_SCANNER_ENABLED
+        value: "false"

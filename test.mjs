@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import os from 'node:os';import {randomUUID,randomBytes,pbkdf2Sync} from 'node:crypto';import {start} from './server.mjs';
+const dir=fs.mkdtempSync(path.join(os.tmpdir(),'radio-server-test-')),file=path.join(dir,'server.json'),password='local-test-password-47',salt=randomBytes(16),config={name:'Test Fire',host:'127.0.0.1',port:8080,channelsFile:'channels.json',passwordSalt:salt.toString('base64'),passwordHash:pbkdf2Sync(password,salt,100000,32,'sha256').toString('base64')};fs.writeFileSync(file,JSON.stringify(config));fs.copyFileSync(new URL('./channels.json',import.meta.url),path.join(dir,'channels.json'));
+let app=start({file,port:0,host:'127.0.0.1',quiet:true});await new Promise(r=>app.server.on('listening',r));let origin='http://127.0.0.1:'+app.server.address().port;
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function request(route,{token,body,method=body?'POST':'GET'}={}){return fetch(origin+route,{method,headers:{...(token?{authorization:'Bearer '+token}:{}),...(body?{'content-type':'application/json'}:{})},body:body?JSON.stringify(body):undefined})}
+async function get(route,opts){const r=await request(route,opts),b=await r.json();assert(r.ok,JSON.stringify(b));return b}
+try{
+ assert.equal((await request('/')).status,200);assert.equal((await request('/audio-test')).status,200);assert.equal((await request('/audio-test.html')).status,200);for(const route of ['/scanner-audio.js','/ptt-cues.js','/ptt-key.wav','/ptt-release.wav'])assert.equal((await request(route)).status,200);for(const route of ['/admin','/api/admin/servers','/server.json','/.data/signing-key'])assert.equal((await request(route)).status,404);
+ assert.equal((await request('/api/radio/login',{body:{password:'incorrect',callsign:'Engine 12',station:randomUUID()}})).status,401);
+ const login=callsign=>get('/api/radio/login',{body:{password,callsign,station:randomUUID()}}),a=await login('Engine 12'),b=await login('Medic 4');assert.equal((await get('/api/radio/me',{token:a.token})).callsign,'Engine 12');
+ const tx=await get('/api/tx',{token:a.token,body:{channel:0,station:'spoof',label:'Wrong Callsign'}});assert.equal((await request('/api/tx',{token:b.token,body:{channel:0}})).status,409);
+ const samples=new Int16Array(1600).fill(2000);assert((await fetch(origin+'/api/tx/'+tx.id+'/packets?seq=0',{method:'POST',headers:{authorization:'Bearer '+a.token},body:samples})).ok);
+ const catchup=await get('/api/feed?channel=0&catchup=1200');assert.equal(catchup.packets[0].tx,tx.id);
+ const feed=await get('/api/feed?channel=0&after=0');assert.equal(feed.packets[0].label,'Engine 12');assert.equal(feed.history[0].lastSeq,0);assert.equal((await get('/api/feed?channel=1&after=0')).packets.length,0);
+ assert.equal((await request('/api/tx/'+tx.id+'/end',{token:b.token,body:{}})).status,403);await get('/api/tx/'+tx.id+'/end',{token:a.token,body:{}});
+ const recording=Buffer.from(await(await request(feed.history[0].recording)).arrayBuffer());assert.equal(recording.subarray(44).compare(Buffer.from(samples.buffer)),0);
+ const channels=JSON.parse(fs.readFileSync(path.join(dir,'channels.json')));channels[0].name='CITY DISPATCH';fs.writeFileSync(path.join(dir,'channels.json'),JSON.stringify(channels));await wait(1100);assert.equal((await get('/api/catalog')).channels[0].name,'CITY DISPATCH');
+ const pairing=await get('/api/pair-code',{token:a.token,body:{}}),operator=await get('/api/pair',{body:{code:pairing.code}});const page=await get('/api/page',{token:operator.token,body:{preset:'structure-fire',channel:0}});assert((await get('/api/feed?channel=0&after=0')).packets.some(p=>p.label==='Dispatch'));await get('/api/tx/'+page.id+'/cancel',{token:operator.token,body:{}});
+ assert(!JSON.stringify(await get('/api/catalog')).includes(config.passwordHash));
+ await app.close();app=start({file,port:0,host:'127.0.0.1',quiet:true});await new Promise(r=>app.server.on('listening',r));origin='http://127.0.0.1:'+app.server.address().port;assert.equal((await get('/api/radio/me',{token:a.token})).callsign,'Engine 12');assert((await get('/api/feed?channel=0&after=0')).history.some(t=>t.id===tx.id));
+ config.passwordHash=pbkdf2Sync('new-testing-password',salt,100000,32,'sha256').toString('base64');fs.writeFileSync(file,JSON.stringify(config));await wait(1100);assert.equal((await request('/api/radio/me',{token:a.token})).status,401);
+ console.log('PASS drop-in server: file configuration, password login, callsigns, channel isolation, transmission ownership, exact recordings, live channel reload, paging, restart persistence, password rotation and no web management routes');
+}finally{await app.close();fs.rmSync(dir,{recursive:true,force:true})}

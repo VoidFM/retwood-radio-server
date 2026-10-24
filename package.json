@@ -1,0 +1,15 @@
+{
+  "name": "retwood-radio-server",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "setup": "node setup.mjs",
+    "start": "node --experimental-sqlite server.mjs",
+    "test": "node --experimental-sqlite test.mjs && node --experimental-sqlite test-protection.mjs",
+    "start:managed": "node --experimental-sqlite managed.mjs"
+  }
+}

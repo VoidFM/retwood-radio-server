@@ -1,0 +1,338 @@
+[
+  {
+    "id": 0,
+    "zoneIndex": 0,
+    "zone": "Clearfield Co",
+    "number": 1,
+    "name": "DISPATCH"
+  },
+  {
+    "id": 1,
+    "zoneIndex": 0,
+    "zone": "Clearfield Co",
+    "number": 2,
+    "name": "FIRE GROUND 1"
+  },
+  {
+    "id": 2,
+    "zoneIndex": 0,
+    "zone": "Clearfield Co",
+    "number": 3,
+    "name": "FIRE GROUND 2"
+  },
+  {
+    "id": 3,
+    "zoneIndex": 0,
+    "zone": "Clearfield Co",
+    "number": 4,
+    "name": "FIRE GROUND 3"
+  },
+  {
+    "id": 4,
+    "zoneIndex": 0,
+    "zone": "Clearfield Co",
+    "number": 5,
+    "name": "FIRE GROUND 4"
+  },
+  {
+    "id": 5,
+    "zoneIndex": 0,
+    "zone": "Clearfield Co",
+    "number": 6,
+    "name": "FIRE GROUND 5"
+  },
+  {
+    "id": 6,
+    "zoneIndex": 0,
+    "zone": "Clearfield Co",
+    "number": 7,
+    "name": "FIRE GROUND 6"
+  },
+  {
+    "id": 7,
+    "zoneIndex": 0,
+    "zone": "Clearfield Co",
+    "number": 8,
+    "name": "FIRE GROUND 7"
+  },
+  {
+    "id": 8,
+    "zoneIndex": 0,
+    "zone": "Clearfield Co",
+    "number": 9,
+    "name": "FIRE GROUND 8"
+  },
+  {
+    "id": 9,
+    "zoneIndex": 0,
+    "zone": "Clearfield Co",
+    "number": 10,
+    "name": "FIRE GROUND 9"
+  },
+  {
+    "id": 10,
+    "zoneIndex": 0,
+    "zone": "Clearfield Co",
+    "number": 11,
+    "name": "FIRE GROUND 10"
+  },
+  {
+    "id": 11,
+    "zoneIndex": 0,
+    "zone": "Clearfield Co",
+    "number": 12,
+    "name": "FIRE GROUND 11"
+  },
+  {
+    "id": 12,
+    "zoneIndex": 0,
+    "zone": "Clearfield Co",
+    "number": 13,
+    "name": "FIRE GROUND 12"
+  },
+  {
+    "id": 13,
+    "zoneIndex": 0,
+    "zone": "Clearfield Co",
+    "number": 14,
+    "name": "OPERATIONS 13"
+  },
+  {
+    "id": 14,
+    "zoneIndex": 0,
+    "zone": "Clearfield Co",
+    "number": 15,
+    "name": "OPERATIONS 14"
+  },
+  {
+    "id": 15,
+    "zoneIndex": 0,
+    "zone": "Clearfield Co",
+    "number": 16,
+    "name": "OPERATIONS 15"
+  },
+  {
+    "id": 16,
+    "zoneIndex": 1,
+    "zone": "Clearfield Co EMS",
+    "number": 1,
+    "name": "EMS DISPATCH"
+  },
+  {
+    "id": 17,
+    "zoneIndex": 1,
+    "zone": "Clearfield Co EMS",
+    "number": 2,
+    "name": "MED 5 DUBOIS"
+  },
+  {
+    "id": 18,
+    "zoneIndex": 1,
+    "zone": "Clearfield Co EMS",
+    "number": 3,
+    "name": "MED 6 CLEARFIELD"
+  },
+  {
+    "id": 19,
+    "zoneIndex": 1,
+    "zone": "Clearfield Co EMS",
+    "number": 4,
+    "name": "EMS OPS 1"
+  },
+  {
+    "id": 20,
+    "zoneIndex": 1,
+    "zone": "Clearfield Co EMS",
+    "number": 5,
+    "name": "EMS OPS 2"
+  },
+  {
+    "id": 21,
+    "zoneIndex": 1,
+    "zone": "Clearfield Co EMS",
+    "number": 6,
+    "name": "EMS OPS 3"
+  },
+  {
+    "id": 22,
+    "zoneIndex": 1,
+    "zone": "Clearfield Co EMS",
+    "number": 7,
+    "name": "EMS OPS 4"
+  },
+  {
+    "id": 23,
+    "zoneIndex": 1,
+    "zone": "Clearfield Co EMS",
+    "number": 8,
+    "name": "QRS OPS"
+  },
+  {
+    "id": 24,
+    "zoneIndex": 1,
+    "zone": "Clearfield Co EMS",
+    "number": 9,
+    "name": "ALS OPS"
+  },
+  {
+    "id": 25,
+    "zoneIndex": 1,
+    "zone": "Clearfield Co EMS",
+    "number": 10,
+    "name": "HOSPITAL PATCH"
+  },
+  {
+    "id": 26,
+    "zoneIndex": 1,
+    "zone": "Clearfield Co EMS",
+    "number": 11,
+    "name": "AIR MEDICAL"
+  },
+  {
+    "id": 27,
+    "zoneIndex": 1,
+    "zone": "Clearfield Co EMS",
+    "number": 12,
+    "name": "LANDING ZONE"
+  },
+  {
+    "id": 28,
+    "zoneIndex": 1,
+    "zone": "Clearfield Co EMS",
+    "number": 13,
+    "name": "EMS STANDBY"
+  },
+  {
+    "id": 29,
+    "zoneIndex": 1,
+    "zone": "Clearfield Co EMS",
+    "number": 14,
+    "name": "EMS MUTUAL AID"
+  },
+  {
+    "id": 30,
+    "zoneIndex": 1,
+    "zone": "Clearfield Co EMS",
+    "number": 15,
+    "name": "EMS TRAINING"
+  },
+  {
+    "id": 31,
+    "zoneIndex": 1,
+    "zone": "Clearfield Co EMS",
+    "number": 16,
+    "name": "EMS DIRECT"
+  },
+  {
+    "id": 32,
+    "zoneIndex": 2,
+    "zone": "Clearfield Co TAC",
+    "number": 1,
+    "name": "COUNTY OPS"
+  },
+  {
+    "id": 33,
+    "zoneIndex": 2,
+    "zone": "Clearfield Co TAC",
+    "number": 2,
+    "name": "COMMAND 1"
+  },
+  {
+    "id": 34,
+    "zoneIndex": 2,
+    "zone": "Clearfield Co TAC",
+    "number": 3,
+    "name": "COMMAND 2"
+  },
+  {
+    "id": 35,
+    "zoneIndex": 2,
+    "zone": "Clearfield Co TAC",
+    "number": 4,
+    "name": "INCIDENT OPS 1"
+  },
+  {
+    "id": 36,
+    "zoneIndex": 2,
+    "zone": "Clearfield Co TAC",
+    "number": 5,
+    "name": "INCIDENT OPS 2"
+  },
+  {
+    "id": 37,
+    "zoneIndex": 2,
+    "zone": "Clearfield Co TAC",
+    "number": 6,
+    "name": "INCIDENT OPS 3"
+  },
+  {
+    "id": 38,
+    "zoneIndex": 2,
+    "zone": "Clearfield Co TAC",
+    "number": 7,
+    "name": "SEARCH / RESCUE"
+  },
+  {
+    "id": 39,
+    "zoneIndex": 2,
+    "zone": "Clearfield Co TAC",
+    "number": 8,
+    "name": "WATER RESCUE"
+  },
+  {
+    "id": 40,
+    "zoneIndex": 2,
+    "zone": "Clearfield Co TAC",
+    "number": 9,
+    "name": "HAZMAT OPS"
+  },
+  {
+    "id": 41,
+    "zoneIndex": 2,
+    "zone": "Clearfield Co TAC",
+    "number": 10,
+    "name": "COUNTY EMA"
+  },
+  {
+    "id": 42,
+    "zoneIndex": 2,
+    "zone": "Clearfield Co TAC",
+    "number": 11,
+    "name": "MUTUAL AID 1"
+  },
+  {
+    "id": 43,
+    "zoneIndex": 2,
+    "zone": "Clearfield Co TAC",
+    "number": 12,
+    "name": "MUTUAL AID 2"
+  },
+  {
+    "id": 44,
+    "zoneIndex": 2,
+    "zone": "Clearfield Co TAC",
+    "number": 13,
+    "name": "EVENT OPS"
+  },
+  {
+    "id": 45,
+    "zoneIndex": 2,
+    "zone": "Clearfield Co TAC",
+    "number": 14,
+    "name": "TRAINING"
+  },
+  {
+    "id": 46,
+    "zoneIndex": 2,
+    "zone": "Clearfield Co TAC",
+    "number": 15,
+    "name": "DIRECT 1"
+  },
+  {
+    "id": 47,
+    "zoneIndex": 2,
+    "zone": "Clearfield Co TAC",
+    "number": 16,
+    "name": "DIRECT 2"
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "name": "Clearfield County",
+  "host": "0.0.0.0",
+  "port": 8080,
+  "channelsFile": "channels.json",
+  "dataDirectory": ".data",
+  "dispatchCallsign": "Dispatch",
+  "passwordSalt": "WecYBVf8WdGbzShG9lFD+Q==",
+  "passwordHash": "tBcXb0Z15gocOkfxDpaQR6bhr292aY1vlXULDB4KlXM="
+}

@@ -1,0 +1,12 @@
+import fs from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';import {randomBytes,pbkdf2Sync} from 'node:crypto';import readline from 'node:readline/promises';
+const root=path.dirname(fileURLToPath(import.meta.url)),file=path.resolve(process.env.RADIO_CONFIG||path.join(root,'server.json'));
+const prompt=readline.createInterface({input:process.stdin,output:process.stdout});
+async function password(){if(process.env.RADIO_PASSWORD)return process.env.RADIO_PASSWORD;if(!process.stdin.isTTY)throw Error('Use an interactive terminal, or set RADIO_PASSWORD for automated setup');prompt.close();process.stdout.write('Server password (at least 10 characters, hidden): ');process.stdin.setRawMode(true);process.stdin.resume();return new Promise((resolve,reject)=>{let value='';const listener=data=>{for(const c of data.toString()){if(c==='\r'||c==='\n'){process.stdin.setRawMode(false);process.stdin.removeListener('data',listener);process.stdin.pause();process.stdout.write('\n');resolve(value);return}if(c==='\u0003'){process.stdin.setRawMode(false);process.stdin.removeListener('data',listener);reject(Error('Setup canceled'));return}if(c==='\u007f'||c==='\b')value=value.slice(0,-1);else if(c>=' ')value+=c}};process.stdin.on('data',listener)})}
+try{
+ let previous={};if(fs.existsSync(file))previous=JSON.parse(fs.readFileSync(file,'utf8'));
+ const name=process.env.RADIO_NAME||(await prompt.question(`Server name [${previous.name||'Metro Fire'}]: `)).trim()||previous.name||'Metro Fire';
+ if(!name||name.length>40)throw Error('Server name must have 1–40 characters');
+ const value=await password();prompt.close();if(value.length<10||value.length>128)throw Error('Password must have 10–128 characters');
+ const salt=randomBytes(16),config={name,host:previous.host||'0.0.0.0',port:previous.port||8080,channelsFile:previous.channelsFile||'channels.json',dataDirectory:previous.dataDirectory||'.data',dispatchCallsign:previous.dispatchCallsign||'Dispatch',...previous,password:undefined,passwordSalt:salt.toString('base64'),passwordHash:pbkdf2Sync(value,salt,100000,32,'sha256').toString('base64')};config.name=name;
+ fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,JSON.stringify(config,null,2)+'\n',{mode:0o600});fs.chmodSync(file,0o600);console.log('Saved private server configuration. Start with: node --experimental-sqlite server.mjs');
+}catch(e){prompt.close();console.error(e.message);process.exitCode=1}
